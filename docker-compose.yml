@@ -1,0 +1,18 @@
+services:
+  web:
+    build: .
+    image: yeyo-web:latest
+    container_name: yeyo-web
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    read_only: true
+    # Con read_only el contenedor no puede escribir en su disco. nginx sólo
+    # necesita estos tres puntos, que van en memoria. Si algo fallara al
+    # arrancar, quita read_only y los tmpfs: el sitio funciona igual.
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
+    security_opt:
+      - no-new-privileges:true

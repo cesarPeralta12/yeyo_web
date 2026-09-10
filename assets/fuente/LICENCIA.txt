@@ -1,0 +1,12 @@
+Archivo — Omnibus-Type
+SIL Open Font License 1.1
+
+Fuente variable (ejes wght 100-900 y wdth 62-125), descargada desde Google
+Fonts y auto-hospedada para que el sitio no haga peticiones a terceros.
+
+Subconjuntos incluidos:
+  archivo-latin.woff2       U+0000-00FF y signos habituales
+  archivo-latin-ext.woff2   latín extendido
+
+Texto completo de la licencia: https://openfontlicense.org
+Proyecto original: https://github.com/Omnibus-Type/Archivo

@@ -60,6 +60,29 @@ def recurso(rel):
     return f"{rel}?v={version(rel)}"
 
 
+def medida_webp(rel):
+    """Ancho y alto de un .webp leyendo la cabecera, sin depender de Pillow.
+    Así build.py funciona sólo con la biblioteca estándar."""
+    with open(os.path.join(AQUI, rel), "rb") as f:
+        d = f.read(32)
+    if d[:4] != b"RIFF" or d[8:12] != b"WEBP":
+        raise ValueError(f"{rel} no es un WEBP")
+    tipo = d[12:16]
+    if tipo == b"VP8X":                                   # extendido (el que trae alfa)
+        ancho = int.from_bytes(d[24:27], "little") + 1
+        alto = int.from_bytes(d[27:30], "little") + 1
+    elif tipo == b"VP8 ":                                 # con pérdida
+        ancho = int.from_bytes(d[26:28], "little") & 0x3FFF
+        alto = int.from_bytes(d[28:30], "little") & 0x3FFF
+    elif tipo == b"VP8L":                                 # sin pérdida
+        b = int.from_bytes(d[21:25], "little")
+        ancho = (b & 0x3FFF) + 1
+        alto = ((b >> 14) & 0x3FFF) + 1
+    else:
+        raise ValueError(f"{rel}: variante WEBP desconocida {tipo!r}")
+    return ancho, alto
+
+
 LOGO = leer("logo.svg")
 SIMBOLO = leer("simbolo.svg")
 _ICONOS = {}
@@ -215,9 +238,7 @@ def página(archivo, titulo, descripcion, cuerpo, activa="", clase_body=""):
 <meta property="og:image" content="{SITIO}/assets/img/foto/home-color.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="{recurso("assets/img/favicon.svg")}" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap">
+<link rel="preload" href="{recurso("assets/fuente/archivo-latin.woff2")}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/style.css?v={v_css}">
 <script type="application/ld+json">{json_ld}</script>
 </head>
@@ -876,8 +897,7 @@ def soy_yeyo():
 
 
 def error404():
-    from PIL import Image
-    av = Image.open(os.path.join(IMG, "avatar.webp")).size
+    av = medida_webp("assets/img/avatar.webp")
     cuerpo = f"""
 <section class="seccion envoltura oscuro" style="min-height:calc(100svh - var(--header-h));display:grid;align-content:center">
   <div class="contacto" style="align-items:center">

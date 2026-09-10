@@ -27,6 +27,41 @@ python -m http.server 8000
 
 Y abrir <http://localhost:8000>.
 
+## Desplegar con Docker
+
+El sitio se sirve con nginx desde una imagen que se construye sola:
+
+```bash
+docker compose up -d --build
+```
+
+Queda en <http://localhost:8080>. Para parar: `docker compose down`.
+
+Sin compose:
+
+```bash
+docker build -t yeyo-web .
+docker run -d -p 8080:80 --name yeyo-web yeyo-web
+```
+
+La imagen es de dos etapas. La primera corre `build.py` sobre `python:3.12-alpine`
+y **no instala nada**: el generador usa sólo la biblioteca estándar. La segunda
+copia el resultado a `nginx:1.27-alpine`. Regenerar el HTML dentro de la imagen
+evita que quede desincronizado respecto a `build.py`.
+
+`material-original/` y `docs/` quedan fuera por `.dockerignore`: son 21 MB que
+el sitio no sirve. A la imagen entran unos 3,2 MB de assets.
+
+nginx sirve con gzip, cabeceras de seguridad, `Content-Security-Policy`, caché
+de un año para `/assets/` (llevan huella en la URL, así que es seguro), sin
+caché para el HTML, y URLs limpias: `/trabajo` funciona igual que
+`/trabajo.html`.
+
+Las cabeceras viven en `seguridad.conf` y se incluyen en cada `location`. No es
+redundancia: en nginx un `add_header` dentro de un `location` descarta todos los
+heredados del bloque `server`, así que declararlas una sola vez arriba las
+perdería justo donde hacen falta.
+
 ## Cómo editarlo
 
 Todo el contenido vive en **`build.py`**. Las páginas `.html` son generadas:
@@ -64,8 +99,11 @@ web/
 ├── soy-yeyo.html         historia en capítulos · recorrido · material
 ├── 404.html
 ├── robots.txt · sitemap.xml
+├── Dockerfile · docker-compose.yml · .dockerignore
+├── nginx.conf · seguridad.conf
 └── assets/
     ├── css/style.css     sistema visual completo
+    ├── fuente/           Archivo variable, auto-hospedada (SIL OFL 1.1)
     ├── js/main.js        menú, revelado, filtros, formularios
     └── img/
         ├── logo.svg      lockup vectorizado (símbolo verde + texto currentColor)
@@ -80,10 +118,14 @@ web/
 
 - **Color**: solo #95D200, #000 y #FFF, como manda el manual. Los grises son de
   interfaz, declarados como variables aparte.
-- **Tipografía**: `Archivo` variable de Google Fonts. Los titulares usan el eje de
-  ancho real (`font-variation-settings:'wdth' 66`) para reproducir Nimbus Sans
-  Narrow sin deformar la letra. Los textos van a `wdth 100`. Una sola familia,
-  una sola petición.
+- **Tipografía**: `Archivo` variable, **auto-hospedada** en `assets/fuente/`.
+  Los titulares usan el eje de ancho real (`font-variation-settings:'wdth' 66`)
+  para reproducir Nimbus Sans Narrow sin deformar la letra; los textos van a
+  `wdth 100`. Una sola familia.
+  Se sirve desde el propio dominio en vez de pedirla a `fonts.googleapis.com`:
+  así no se filtra la IP de quien visita y la página no depende de que un
+  tercero responda. Son 176 KB en dos subconjuntos (latin y latin-ext), y el
+  navegador sólo descarga el que necesita.
 - **Formas**: `border-radius: 0` y `box-shadow` en ninguna parte, según
   «bloques rectos · mucho aire · sin sombras».
 - **Símbolo**: reconstruido como 4 chevrones rotados 90°, geométricamente exacto

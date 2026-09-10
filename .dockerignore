@@ -1,0 +1,25 @@
+# Material fuente del cliente: 20 MB que el sitio no sirve.
+material-original/
+
+# Documentación del proyecto, no forma parte del sitio.
+docs/
+README.md
+LEEME.md
+
+# Salida del generador: se regenera dentro de la imagen.
+*.html
+
+# Control de versiones y herramientas
+.git/
+.gitignore
+.github/
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Basura del sistema
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+desktop.ini
