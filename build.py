@@ -5,6 +5,7 @@ Generador estatico del sitio de Yeyo Vera.
 Mantiene una sola fuente de verdad para cabecera, pie y metadatos, y escribe
 los .html finales. Para regenerar el sitio:   python build.py
 """
+import hashlib
 import os
 import re
 
@@ -37,6 +38,13 @@ def leer(nombre):
         return f.read()
 
 
+def version(rel):
+    """Huella corta del archivo, para romper la caché del navegador al desplegar."""
+    ruta = os.path.join(AQUI, rel)
+    with open(ruta, "rb") as f:
+        return hashlib.md5(f.read()).hexdigest()[:8]
+
+
 LOGO = leer("logo.svg")
 SIMBOLO = leer("simbolo.svg")
 _ICONOS = {}
@@ -53,8 +61,13 @@ def icono(nombre, clase="", etiqueta=None):
     return svg.replace("<svg", "<svg" + attrs, 1)
 
 
-def marca(clase="", etiqueta="Yeyo Vera"):
-    return LOGO.replace("<svg", f'<svg class="{clase}"', 1) if clase else LOGO
+def marca(negativa=True):
+    """Logotipo original del manual de marca (versión A positiva / B negativa)."""
+    base = "logo-neg" if negativa else "logo"
+    srcset = ", ".join(f"assets/img/{base}-{w}.png {w}w" for w in (320, 480, 640))
+    return (f'<img src="assets/img/{base}-480.png" srcset="{srcset}" '
+            f'sizes="(max-width:900px) 122px, 158px" alt="Yeyo Vera" '
+            f'width="1926" height="685" decoding="async">')
 
 
 def simbolo(clase=""):
@@ -70,17 +83,17 @@ def enlace(texto, href, clase="enlace"):
     return f'<a class="{clase}" href="{href}"><span>{texto}</span>{FLECHA}</a>'
 
 
-def foto(nombre, alt, sizes, clase="", pos=None, eager=False):
-    """<img> con srcset webp y respaldo jpg."""
-    src = f"assets/img/foto/{nombre}-v-1000.webp"
-    srcset = ", ".join(
-        f"assets/img/foto/{nombre}-v-{w}.webp {w}w" for w in (640, 1000, 1500)
-    )
+def foto(nombre, alt, sizes, clase="", pos=None, eager=False,
+         anchos=(640, 1000, 1500), dim=(1000, 1500)):
+    """<img> con srcset webp."""
+    medio = anchos[len(anchos) // 2]
+    src = f"assets/img/foto/{nombre}-v-{medio}.webp"
+    srcset = ", ".join(f"assets/img/foto/{nombre}-v-{w}.webp {w}w" for w in anchos)
     estilo = f' style="object-position:{pos}"' if pos else ""
     carga = ' loading="eager" fetchpriority="high"' if eager else ' loading="lazy"'
     cl = f' class="{clase}"' if clase else ""
     return (f'<img{cl} src="{src}" srcset="{srcset}" sizes="{sizes}" '
-            f'alt="{alt}" width="1000" height="1500" decoding="async"{carga}{estilo}>')
+            f'alt="{alt}" width="{dim[0]}" height="{dim[1]}" decoding="async"{carga}{estilo}>')
 
 
 # --------------------------------------------------------------------------
@@ -145,7 +158,7 @@ JSON_LD = """{
  "jobTitle":"Consultor creativo estrat\u00e9gico, speaker y educador",
  "description":"Acompa\u00f1a a marcas, equipos y personas a convertir prop\u00f3sito en estrategia, creatividad y acci\u00f3n.",
  "url":"%(sitio)s",
- "image":"%(sitio)s/assets/img/foto/retrato-frontal.jpg",
+ "image":"%(sitio)s/assets/img/foto/home-color.jpg",
  "email":"mailto:%(correo)s",
  "worksFor":{"@type":"Organization","name":"Atomik Pro"},
  "knowsAbout":["Estrategia de marca","Creatividad","Marketing","Liderazgo","Prop\u00f3sito"],
@@ -162,6 +175,8 @@ def página(archivo, titulo, descripcion, cuerpo, activa="", clase_body=""):
         "redes": ",".join(f'"{u}"' for u in REDES.values() if u.startswith("http")),
     }
     body_attr = f' class="{clase_body}"' if clase_body else ""
+    v_css = version(os.path.join("assets", "css", "style.css"))
+    v_js = version(os.path.join("assets", "js", "main.js"))
     html = f"""<!doctype html>
 <html lang="es">
 <head>
@@ -177,13 +192,13 @@ def página(archivo, titulo, descripcion, cuerpo, activa="", clase_body=""):
 <meta property="og:title" content="{titulo}">
 <meta property="og:description" content="{descripcion}">
 <meta property="og:url" content="{canon}">
-<meta property="og:image" content="{SITIO}/assets/img/foto/retrato-frontal.jpg">
+<meta property="og:image" content="{SITIO}/assets/img/foto/home-color.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap">
-<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/style.css?v={v_css}">
 <script type="application/ld+json">{json_ld}</script>
 </head>
 <body{body_attr}>
@@ -192,7 +207,7 @@ def página(archivo, titulo, descripcion, cuerpo, activa="", clase_body=""):
 {cuerpo}
 </main>
 {pie()}
-<script src="assets/js/main.js" defer></script>
+<script src="assets/js/main.js?v={v_js}" defer></script>
 </body>
 </html>
 """
@@ -393,8 +408,8 @@ def home():
       {enlace('Ver mi trabajo', 'trabajo.html')}
     </div>
   </div>
-  <figure class="hero__figura revelar revelar--d2" style="margin:0">
-    {foto('retrato-frontal', 'Retrato de Sergio Yeyo Vera', '(max-width:900px) 86vw, 30vw', pos='center 20%', eager=True)}
+  <figure class="hero__figura hero__figura--recorte revelar revelar--d2" style="margin:0">
+    {foto('hero-yeyo', 'Sergio Yeyo Vera sentado, retrato en blanco y negro', '(max-width:900px) 78vw, 34vw', eager=True, anchos=(640, 824), dim=(824, 924))}
     <figcaption class="hero__pie"><span>La verdad que mueve</span><span>Santa Cruz, Bolivia</span></figcaption>
   </figure>
 </section>
@@ -473,7 +488,7 @@ def home():
 
 <section class="sobre" id="soy-yeyo">
   <div class="sobre__foto revelar">
-    {foto('retrato-pecho', 'Sergio Yeyo Vera', '(max-width:900px) 100vw, 50vw', pos='center 15%')}
+    {foto('home-color', 'Sergio Yeyo Vera, retrato a contraluz', '(max-width:900px) 100vw, 50vw', pos='center 22%', anchos=(640, 1000, 1086), dim=(1086, 1448))}
   </div>
   <div class="sobre__copy revelar revelar--d1">
     <p class="kicker kicker--tenue"><span class="n">07</span>Soy Yeyo</p>
@@ -799,7 +814,7 @@ def soy_yeyo():
 
 <section class="sobre">
   <div class="sobre__foto revelar">
-    {foto('traje-claro', 'Sergio Yeyo Vera, retrato', '(max-width:900px) 100vw, 50vw', pos='center 12%')}
+    {foto('soy-yeyo', 'Sergio Yeyo Vera, retrato de perfil en blanco y negro', '(max-width:900px) 100vw, 50vw', pos='center 18%', anchos=(640, 1000, 1024), dim=(1024, 1536))}
   </div>
   <div class="sobre__copy revelar revelar--d1">
     <p class="kicker kicker--tenue">Quien soy</p>
