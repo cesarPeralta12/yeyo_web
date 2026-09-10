@@ -74,7 +74,7 @@ h1,h2,h3,h4,.display{
   text-wrap:balance;
 }
 
-h1,.h1{font-size:clamp(2.9rem,7.6vw,8rem);letter-spacing:-.02em}
+h1,.h1{font-size:clamp(2.7rem,6.5vw,7rem);letter-spacing:-.02em}
 h2,.h2{font-size:clamp(2.3rem,5.4vw,5.4rem);letter-spacing:-.016em}
 h3,.h3{font-size:clamp(1.45rem,2.4vw,2.6rem)}
 h4,.h4{font-size:clamp(1.05rem,1.4vw,1.35rem)}
@@ -287,7 +287,7 @@ p:last-child{margin-bottom:0}
   padding:clamp(3rem,6vw,6rem) var(--pad) clamp(2.5rem,4vw,4rem);
   min-height:calc(100svh - var(--header-h));
   display:grid;
-  grid-template-columns:minmax(0,1.62fr) minmax(250px,.72fr);
+  grid-template-columns:minmax(0,1.35fr) minmax(290px,1fr);
   gap:var(--gutter);
   align-items:end;
   overflow:hidden;
@@ -325,7 +325,7 @@ p:last-child{margin-bottom:0}
   border:0;
   object-fit:contain;
   object-position:bottom center;
-  height:min(72vh,660px);
+  height:min(78vh,740px);
 }
 .hero__figura--recorte .hero__pie{
   border-top:1px solid var(--linea-oscura);
@@ -877,9 +877,9 @@ a.chip:hover,.chip--activo{background:var(--verde);border-color:var(--verde);col
   .hamburguesa{display:block}
 
   .hero{grid-template-columns:1fr;min-height:0;padding-top:3rem;align-items:start}
-  .hero__figura{max-width:430px;margin-left:auto;width:100%}
+  .hero__figura{max-width:520px;margin-left:auto;width:100%}
   .hero__figura img{height:min(52vh,460px)}
-  .hero__figura--recorte img{height:min(48vh,420px)}
+  .hero__figura--recorte img{height:min(56vh,500px)}
   .hero__marca{right:-28vw;top:-8vw;width:74vw}
 
   .encabezado,.metodo__intro,.prueba,.idea-destacada,.sobre,.contacto,
