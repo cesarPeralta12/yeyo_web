@@ -113,10 +113,29 @@ web/
 - Bio descargable y fotos oficiales para el speaker kit.
 - Artículos reales (hoy hay 6 titulares de ejemplo marcados «Próximamente»).
 
-**Formularios**: los tres formularios (contacto, contratación de conferencia y
-boletín) validan en el navegador, llevan honeypot anti-spam y hoy abren el correo
-del usuario con el mensaje ya redactado. Cuando exista un endpoint, sustituir el
-bloque marcado en `assets/js/main.js` por un `fetch()` a ese endpoint.
+**Formularios**: los cuatro (contacto en la home, contacto en Trabajo,
+contratación de conferencia y boletín) envían por AJAX a **FormSubmit**, que
+reenvía al correo configurado. No hace falta crear cuenta ni servidor, así que
+funciona igual en GitHub Pages que en cualquier hosting estático.
+
+Para activarlo, dos pasos:
+
+1. Poner el correo real en la constante `CORREO` de `build.py` y correr
+   `python build.py`. El endpoint se arma solo a partir de ese correo.
+2. Hacer un envío de prueba desde el sitio. FormSubmit manda **una única vez**
+   un correo de activación a esa dirección: hay que abrirlo y confirmar. A
+   partir de ahí todos los envíos llegan directo.
+
+Detalles de la implementación:
+
+- Validación nativa del navegador antes de enviar; si algo falta, no sale nada.
+- Honeypot `_honey`, que FormSubmit también entiende y filtra por su cuenta.
+- Botón bloqueado y con rótulo «Enviando…» mientras dura la petición.
+- Confirmación o error en línea, sin sacar al visitante de la página.
+- **Respaldo**: si el endpoint falla o no responde, se abre el correo del
+  visitante con el mensaje ya redactado. Nunca se pierde un contacto.
+- Para cambiar de proveedor (Formspree, Basin, Netlify Forms) basta con tocar
+  la constante `ENDPOINT` en `build.py`.
 
 ## Accesibilidad
 

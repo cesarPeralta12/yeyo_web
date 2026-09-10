@@ -14,6 +14,11 @@ IMG = os.path.join(AQUI, "assets", "img")
 
 SITIO = "https://yeyovera.com"          # PENDIENTE: confirmar dominio
 CORREO = "hola@yeyovera.com"            # PENDIENTE: confirmar correo
+
+# Envío de formularios. FormSubmit reenvía al CORREO de arriba y no necesita
+# cuenta: basta con confirmar una vez el correo de activación que manda en el
+# primer envío. Para cambiar de proveedor, sólo hay que tocar esta línea.
+ENDPOINT = f"https://formsubmit.co/ajax/{CORREO}"
 REDES = {
     "LinkedIn": "https://www.linkedin.com/",
     "Instagram": "https://www.instagram.com/",
@@ -509,7 +514,7 @@ def home():
       <p class="texto texto--claro" style="margin-top:2rem">Una marca, un equipo, una audiencia o quizás algo que todavía necesita nombre. Cuentame el desafio y te respondo con una primera lectura.</p>
       <p class="texto texto--claro" style="margin-top:2rem">También puedes escribir directo a <a href="mailto:{CORREO}" style="color:var(--verde)">{CORREO}</a>.</p>
     </div>
-    <form class="formulario revelar revelar--d1" data-form="contacto" data-destino="{CORREO}" novalidate>
+    <form class="formulario revelar revelar--d1" data-form="contacto" data-destino="{CORREO}" data-endpoint="{ENDPOINT}" novalidate>
       <div class="campo--doble">
         <div class="campo">
           <label for="c-nombre">Nombre</label>
@@ -537,7 +542,7 @@ def home():
         <label for="c-desafio">Breve desafio</label>
         <textarea id="c-desafio" name="Desafio" rows="3" required></textarea>
       </div>
-      <p class="miel" aria-hidden="true"><label>No llenar<input type="text" name="website" tabindex="-1" autocomplete="off"></label></p>
+      <p class="miel" aria-hidden="true"><label>No llenar<input type="text" name="_honey" tabindex="-1" autocomplete="off"></label></p>
       <button class="btn btn--verde" type="submit"><span>Iniciar conversación</span></button>
       <p class="respuesta" role="status" hidden></p>
     </form>
@@ -622,14 +627,14 @@ def trabajo():
       <h2 style="margin-top:1.6rem">Cuentame el desafio.</h2>
       <p class="texto texto--claro" style="margin-top:2rem">La conversación define el alcance. No trabajo con paquetes cerrados ni publico precios: cada proyecto se propone después de entender el problema.</p>
     </div>
-    <form class="formulario revelar revelar--d1" data-form="contacto" data-destino="{CORREO}" novalidate>
+    <form class="formulario revelar revelar--d1" data-form="contacto" data-destino="{CORREO}" data-endpoint="{ENDPOINT}" novalidate>
       <div class="campo--doble">
         <div class="campo"><label for="t-nombre">Nombre</label><input id="t-nombre" name="Nombre" type="text" required autocomplete="name"></div>
         <div class="campo"><label for="t-org">Organización</label><input id="t-org" name="Organización" type="text" autocomplete="organization"></div>
       </div>
       <div class="campo"><label for="t-contacto">Correo o WhatsApp</label><input id="t-contacto" name="Contacto" type="text" required></div>
       <div class="campo"><label for="t-desafio">Qué necesitas mover</label><textarea id="t-desafio" name="Desafio" rows="4" required></textarea></div>
-      <p class="miel" aria-hidden="true"><label>No llenar<input type="text" name="website" tabindex="-1" autocomplete="off"></label></p>
+      <p class="miel" aria-hidden="true"><label>No llenar<input type="text" name="_honey" tabindex="-1" autocomplete="off"></label></p>
       <button class="btn btn--verde" type="submit"><span>Iniciar conversación</span></button>
       <p class="respuesta" role="status" hidden></p>
     </form>
@@ -702,7 +707,7 @@ def conferencias():
       <h2 style="margin-top:1.6rem">Cuentame del evento.</h2>
       <p class="texto texto--claro" style="margin-top:2rem">Con estos datos puedo responder con disponibilidad, formato sugerido y propuesta en pocos días.</p>
     </div>
-    <form class="formulario revelar revelar--d1" data-form="conferencia" data-destino="{CORREO}" novalidate>
+    <form class="formulario revelar revelar--d1" data-form="conferencia" data-destino="{CORREO}" data-endpoint="{ENDPOINT}" novalidate>
       <div class="campo--doble">
         <div class="campo"><label for="f-fecha">Fecha</label><input id="f-fecha" name="Fecha" type="date" required></div>
         <div class="campo"><label for="f-ciudad">Ciudad o virtual</label><input id="f-ciudad" name="Ciudad" type="text" required></div>
@@ -721,7 +726,7 @@ def conferencias():
       </div>
       <div class="campo"><label for="f-presupuesto">Presupuesto estimado</label><input id="f-presupuesto" name="Presupuesto" type="text"></div>
       <div class="campo"><label for="f-contacto">Contacto</label><input id="f-contacto" name="Contacto" type="text" required></div>
-      <p class="miel" aria-hidden="true"><label>No llenar<input type="text" name="website" tabindex="-1" autocomplete="off"></label></p>
+      <p class="miel" aria-hidden="true"><label>No llenar<input type="text" name="_honey" tabindex="-1" autocomplete="off"></label></p>
       <button class="btn btn--verde" type="submit"><span>Enviar invitacion</span></button>
       <p class="respuesta" role="status" hidden></p>
     </form>
@@ -779,7 +784,7 @@ def ideas():
       <h2 style="margin-top:1.6rem">Una idea<br>con propósito.</h2>
       <p class="texto texto--claro" style="margin-top:2rem">Breve, útil y con una frecuencia sostenible. Sin spam y con baja en un clic.</p>
     </div>
-    <form class="formulario revelar revelar--d1" data-form="boletin" data-destino="{CORREO}" novalidate>
+    <form class="formulario revelar revelar--d1" data-form="boletin" data-destino="{CORREO}" data-endpoint="{ENDPOINT}" novalidate>
       <div class="boletin__form">
         <div class="campo">
           <label for="b-correo">Tu correo</label>
@@ -787,7 +792,7 @@ def ideas():
         </div>
         <button class="btn btn--verde" type="submit"><span>Suscribirme</span></button>
       </div>
-      <p class="miel" aria-hidden="true"><label>No llenar<input type="text" name="website" tabindex="-1" autocomplete="off"></label></p>
+      <p class="miel" aria-hidden="true"><label>No llenar<input type="text" name="_honey" tabindex="-1" autocomplete="off"></label></p>
       <p class="respuesta" role="status" hidden></p>
     </form>
   </div>

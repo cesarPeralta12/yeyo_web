@@ -725,7 +725,10 @@ a.chip:hover,.chip--activo{background:var(--verde);border-color:var(--verde);col
   font-size:.9rem;
   color:var(--verde);
 }
+.respuesta--error{border-left-color:#ff5252;color:#ff8a80}
 .respuesta[hidden]{display:none}
+.btn[disabled]{opacity:.55;cursor:progress}
+.btn[disabled]::after{display:none}
 
 /* newsletter */
 .boletin{
