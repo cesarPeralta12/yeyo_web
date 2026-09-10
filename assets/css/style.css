@@ -754,7 +754,7 @@ a.chip:hover,.chip--activo{background:var(--verde);border-color:var(--verde);col
   gap:var(--gutter);
   padding-bottom:3rem;
 }
-.pie__marca img{width:150px}
+.pie__marca img{width:150px;height:auto}
 .pie__marca p{margin-top:1.3rem;color:var(--gris-30);font-size:.9rem;max-width:30ch}
 .pie h4{font-size:.68rem;letter-spacing:.17em;font-variation-settings:'wdth' 100;font-weight:700;color:var(--verde);margin-bottom:1.1rem}
 .pie ul{list-style:none;margin:0;padding:0;display:grid;gap:.65rem}

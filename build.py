@@ -43,11 +43,21 @@ def leer(nombre):
         return f.read()
 
 
+_VERSIONES = {}
+
+
 def version(rel):
     """Huella corta del archivo, para romper la caché del navegador al desplegar."""
-    ruta = os.path.join(AQUI, rel)
-    with open(ruta, "rb") as f:
-        return hashlib.md5(f.read()).hexdigest()[:8]
+    rel = rel.replace("\\", "/")
+    if rel not in _VERSIONES:
+        with open(os.path.join(AQUI, rel), "rb") as f:
+            _VERSIONES[rel] = hashlib.md5(f.read()).hexdigest()[:8]
+    return _VERSIONES[rel]
+
+
+def recurso(rel):
+    """URL de un asset con su huella, para que el navegador no sirva una copia vieja."""
+    return f"{rel}?v={version(rel)}"
 
 
 LOGO = leer("logo.svg")
@@ -66,12 +76,15 @@ def icono(nombre, clase="", etiqueta=None):
     return svg.replace("<svg", "<svg" + attrs, 1)
 
 
-def marca(negativa=True):
+def marca(negativa=True, sizes="(max-width:900px) 122px, 158px", clase=""):
     """Logotipo original del manual de marca (versión A positiva / B negativa)."""
     base = "logo-neg" if negativa else "logo"
-    srcset = ", ".join(f"assets/img/{base}-{w}.png {w}w" for w in (320, 480, 640))
-    return (f'<img src="assets/img/{base}-480.png" srcset="{srcset}" '
-            f'sizes="(max-width:900px) 122px, 158px" alt="Yeyo Vera" '
+    srcset = ", ".join(
+        recurso(f"assets/img/{base}-{w}.png") + f" {w}w" for w in (320, 480, 640)
+    )
+    cl = f' class="{clase}"' if clase else ""
+    return (f'<img{cl} src="{recurso(f"assets/img/{base}-480.png")}" srcset="{srcset}" '
+            f'sizes="{sizes}" alt="Yeyo Vera" '
             f'width="1926" height="685" decoding="async">')
 
 
@@ -92,8 +105,10 @@ def foto(nombre, alt, sizes, clase="", pos=None, eager=False,
          anchos=(640, 1000, 1500), dim=(1000, 1500)):
     """<img> con srcset webp."""
     medio = anchos[len(anchos) // 2]
-    src = f"assets/img/foto/{nombre}-v-{medio}.webp"
-    srcset = ", ".join(f"assets/img/foto/{nombre}-v-{w}.webp {w}w" for w in anchos)
+    src = recurso(f"assets/img/foto/{nombre}-v-{medio}.webp")
+    srcset = ", ".join(
+        recurso(f"assets/img/foto/{nombre}-v-{w}.webp") + f" {w}w" for w in anchos
+    )
     estilo = f' style="object-position:{pos}"' if pos else ""
     carga = ' loading="eager" fetchpriority="high"' if eager else ' loading="lazy"'
     cl = f' class="{clase}"' if clase else ""
@@ -128,7 +143,7 @@ def pie():
     return f"""<footer class="pie">
   <div class="pie__top">
     <div class="pie__marca">
-      {marca()}
+      {marca(sizes="150px")}
       <p>Acompaño a marcas, equipos y personas a convertir propósito en estrategia, creatividad y acción.</p>
     </div>
     <div>
@@ -180,8 +195,8 @@ def página(archivo, titulo, descripcion, cuerpo, activa="", clase_body=""):
         "redes": ",".join(f'"{u}"' for u in REDES.values() if u.startswith("http")),
     }
     body_attr = f' class="{clase_body}"' if clase_body else ""
-    v_css = version(os.path.join("assets", "css", "style.css"))
-    v_js = version(os.path.join("assets", "js", "main.js"))
+    v_css = version("assets/css/style.css")
+    v_js = version("assets/js/main.js")
     html = f"""<!doctype html>
 <html lang="es">
 <head>
@@ -199,7 +214,7 @@ def página(archivo, titulo, descripcion, cuerpo, activa="", clase_body=""):
 <meta property="og:url" content="{canon}">
 <meta property="og:image" content="{SITIO}/assets/img/foto/home-color.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="{recurso("assets/img/favicon.svg")}" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap">
@@ -861,6 +876,8 @@ def soy_yeyo():
 
 
 def error404():
+    from PIL import Image
+    av = Image.open(os.path.join(IMG, "avatar.webp")).size
     cuerpo = f"""
 <section class="seccion envoltura oscuro" style="min-height:calc(100svh - var(--header-h));display:grid;align-content:center">
   <div class="contacto" style="align-items:center">
@@ -874,7 +891,7 @@ def error404():
       </div>
     </div>
     <div class="revelar revelar--d1" style="text-align:center">
-      <img src="assets/img/avatar.webp" alt="" width="444" height="700" loading="lazy" style="margin-inline:auto;max-height:56vh;width:auto">
+      <img src="{recurso("assets/img/avatar.webp")}" alt="" width="{av[0]}" height="{av[1]}" loading="lazy" style="margin-inline:auto;max-height:56vh;width:auto;height:auto">
     </div>
   </div>
 </section>
